@@ -9,7 +9,7 @@ async function deployCrowdfundingFixture() {
   const token = await MockToken.deploy(initialSupply);
 
   const Crowdfunding = await ethers.getContractFactory("Crowdfunding");
-  const crowdfunding = await Crowdfunding.deploy();
+  const crowdfunding = await Crowdfunding.deploy(token.target);
 
   return { creator, contributor, other, token, crowdfunding };
 }
@@ -26,7 +26,7 @@ describe("Crowdfunding", function () {
 
       const tx = await crowdfunding
         .connect(creator)
-        .createCampaign(token.target, goal, duration, "Public park");
+        .createCampaign(goal, duration, "Public park");
       const receipt = await tx.wait();
       const event = receipt.logs.find((log) => log.fragment?.name === "CampaignCreated");
       const campaignId = event.args.id;
@@ -54,7 +54,7 @@ describe("Crowdfunding", function () {
       const duration = 3600;
       const createTx = await crowdfunding
         .connect(creator)
-        .createCampaign(token.target, goal, duration, "Library books");
+        .createCampaign(goal, duration, "Library books");
       const campaignId = (await createTx.wait()).logs[0].args.id;
 
       await token.connect(creator).transfer(contributor.address, ethers.parseEther("30"));
@@ -76,10 +76,10 @@ describe("Crowdfunding", function () {
       );
 
       const goal = ethers.parseEther("100");
-      const duration = 1;
+      const duration = 100;
       const createTx = await crowdfunding
         .connect(creator)
-        .createCampaign(token.target, goal, duration, "Community art");
+        .createCampaign(goal, duration, "Community art");
       const campaignId = (await createTx.wait()).logs[0].args.id;
 
       await token.connect(creator).transfer(contributor.address, ethers.parseEther("40"));

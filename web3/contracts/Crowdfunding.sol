@@ -8,6 +8,12 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 contract Crowdfunding is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
+    address public immutable USDC_ADDRESS;
+
+    constructor(address _usdcAddress) {
+        USDC_ADDRESS = _usdcAddress;
+    }
+
     struct Campaign {
         address creator;
         IERC20 token;
@@ -51,7 +57,6 @@ contract Crowdfunding is ReentrancyGuard {
     error NoContribution();
 
     function createCampaign(
-        IERC20 token,
         uint256 goal,
         uint256 duration,
         string calldata metadata
@@ -64,14 +69,14 @@ contract Crowdfunding is ReentrancyGuard {
 
         campaigns[id] = Campaign({
             creator: msg.sender,
-            token: token,
+            token: IERC20(USDC_ADDRESS),
             goal: goal,
             deadline: deadline,
             raised: 0,
             withdrawn: false
         });
 
-        emit CampaignCreated(id, msg.sender, address(token), goal, deadline, metadata);
+        emit CampaignCreated(id, msg.sender, USDC_ADDRESS, goal, deadline, metadata);
     }
 
     function contribute(uint256 id, uint256 amount) external nonReentrant {
